@@ -1,6 +1,23 @@
 <div class="game-container">
   
-  <div class="board-area">
+  <div class="board-area" *ngIf="gs.gameState() === 'SETUP'">
+    <header class="game-header">
+      <h1>Welcome to the Game</h1>
+      
+      <div *ngIf="gs.prizes().length === 16; else notReady">
+        <h2 style="color: #4caf50; margin-bottom: 2rem;">Ready to Play</h2>
+        <button class="big-start-btn" (click)="gs.startGame()">START GAME</button>
+      </div>
+
+      <ng-template #notReady>
+        <h2 style="color: #f44336;">Setup Incomplete</h2>
+        <p>You need exactly 16 prizes to start. (Current: {{gs.prizes().length}})</p>
+        <a routerLink="/admin" style="color: #2196f3; font-size: 1.2rem; cursor: pointer;">Go to Admin Panel</a>
+      </ng-template>
+    </header>
+  </div>
+
+  <div class="board-area" *ngIf="gs.gameState() !== 'SETUP'">
     <header class="game-header">
       <h1 *ngIf="gs.gameState() === 'PICK_OWN'">Choose YOUR Lucky Briefcase</h1>
       <h1 *ngIf="gs.gameState() === 'PLAYING'">
@@ -33,7 +50,7 @@
          [ngClass]="p.category"
          [class.eliminated]="p.isRevealed">
       <span class="prize-value">
-        {{ p.isRevealed ? (p.value | currency) : '?' }}
+        {{ p.isRevealed ? p.name : "?" }}
       </span>
     </div>
   </div>
@@ -41,15 +58,20 @@
 </div>
 
 <div class="overlay" *ngIf="zoomedCase" (click)="closeZoom()">
-  <div class="zoom-card">
+  
+  <div class="zoom-card" 
+       [class]="zoomedCase.prize.category"
+       (click)="$event.stopPropagation()">
+    
     <h2>Briefcase {{zoomedCase.id}} contained...</h2>
     <img [src]="zoomedCase.prize.imageUrl" alt="Prize Image" class="reveal-img">
+    
     <div class="prize-info" [ngClass]="zoomedCase.prize.category">
       <h3>{{zoomedCase.prize.name}}</h3>
-      <p style="font-size: 1.5rem; font-weight: bold;">{{zoomedCase.prize.value | currency}}</p>
-      <p>{{zoomedCase.prize.category}}</p>
+      <p style="font-size: 1.2rem; font-weight: normal;">{{zoomedCase.prize.category}}</p>
     </div>
-    <p class="tap-hint">(Tap to continue)</p>
+    
+    <p class="tap-hint">(Tap anywhere to close)</p>
   </div>
 </div>
 
@@ -66,10 +88,12 @@
 </div>
 
 <div class="overlay" *ngIf="gs.gameState() === 'FINISHED' && heldCase?.isOpen">
-  <div class="zoom-card winner">
-    <h1>YOU WON!</h1>
+  <canvas #winnerCanvas class="fireworks-canvas"></canvas>
+
+  <div class="zoom-card winner" (click)="resetGame()">
+    <h1 class="black">CONGRATULATIONS!</h1>
     <img [src]="heldCase!.prize.imageUrl" class="reveal-img large">
-    <h2>{{heldCase!.prize.name}}</h2>
-    <h1 style="color: green;">{{heldCase!.prize.value | currency}}</h1>
+    <h2 class="black">You won:</h2>
+    <h1 style="color: #d32f2f; font-size: 2.5rem;">{{heldCase!.prize.name}}</h1>
   </div>
 </div>

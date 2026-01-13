@@ -1,7 +1,13 @@
 <div class="admin-container">
   <header class="admin-header">
     <h1>Game Master Setup</h1>
-    <button class="reset-btn" (click)="resetGame()">⚠ Reset All Data</button>
+    
+    <div class="header-actions" style="display: flex; gap: 10px; margin-bottom: 10px;">
+      <input #fileInput type="file" (change)="importPrizes($event)" style="display:none" accept=".json" />
+      <button (click)="fileInput.click()" class="action-btn">📂 Import JSON</button>
+      <button (click)="exportPrizes()" class="action-btn">💾 Export JSON</button>
+      <button class="reset-btn" (click)="resetGame()">⚠ Reset All</button>
+    </div>
   </header>
   
   <div class="warning" *ngIf="prizes().length < 16">
@@ -24,16 +30,32 @@
   </div>
 
   <div class="list">
-    <div *ngFor="let p of prizes(); let i = index" class="item" [ngClass]="p.category">
-      <div class="item-info">
+    <div *ngFor="let p of sortedPrizes()" class="item" [ngClass]="p.category">
+      <div class="item-info" (click)="openPreview(p)" style="cursor: pointer; flex: 1;">
         <span class="badge">{{p.category}}</span>
         <strong>{{p.name}}</strong> ({{p.value | currency}})
       </div>
-      <button class="remove-btn" (click)="removePrize(i)">X</button>
+      <div class="actions">
+        <button class="view-btn" (click)="openPreview(p)">👁</button>
+        <button class="remove-btn" (click)="removePrize(p.id)">X</button>
+      </div>
     </div>
   </div>
 
   <button class="start-btn" (click)="startGame()" [disabled]="prizes().length !== 16">
     LOCK IN & START GAME
   </button>
+</div>
+
+<div class="overlay" *ngIf="previewPrize" (click)="closePreview()">
+  <div class="zoom-card" (click)="$event.stopPropagation()">
+    <h2>Prize Preview</h2>
+    <img [src]="previewPrize.imageUrl" alt="Prize Image" class="reveal-img">
+    <div class="prize-info" [ngClass]="previewPrize.category">
+      <h3>{{previewPrize.name}}</h3>
+      <p style="font-size: 1.5rem; font-weight: bold;">{{previewPrize.value | currency}}</p>
+      <p>{{previewPrize.category}}</p>
+    </div>
+    <p class="tap-hint">(Click outside to close)</p>
+  </div>
 </div>

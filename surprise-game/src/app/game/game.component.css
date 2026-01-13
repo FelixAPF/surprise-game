@@ -90,7 +90,7 @@
 .prize-row.Novice { background: white; }
 .prize-row.Avancé { background: #ffe135; }
 .prize-row.Élite { background: #4169e1; color: white; }
-.prize-row.Prestige { background: #c0c0c0; }
+.prize-row.Prestige { background: #f44336; }
 .prize-row.Légendaire { background: black; color: white; border: 1px solid white; }
 
 .prize-row.eliminated {
@@ -133,7 +133,7 @@
 .prize-info.Avancé { background: #ffe135; }
 .prize-info.Élite { background: #4169e1; color: white; }
 .prize-info.Prestige { background: #f44336; }
-.prize-info.Légendaire { background: black; color: black; }
+.prize-info.Légendaire { background: black; color: white; }
 
 .actions button {
   padding: 15px 30px;
@@ -148,3 +148,129 @@
 
 @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
 @keyframes zoomIn { from {transform: scale(0);} to {transform: scale(1);} }
+
+/* ... existing styles ... */
+
+.big-start-btn {
+  padding: 20px 40px;
+  font-size: 2rem;
+  font-weight: bold;
+  background: linear-gradient(to bottom, #4caf50, #388e3c);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  transition: transform 0.1s;
+}
+
+.big-start-btn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(to bottom, #5cb860, #43a047);
+}
+
+.big-start-btn:active {
+  transform: scale(0.98);
+}
+
+
+/* ... existing styles ... */
+
+/* BASE CARD STYLE */
+.zoom-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  color: white;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  z-index: 10; /* Ensure card is above fireworks */
+  /* Default Animation */
+  animation: zoomIn 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+/* --- TIERED ANIMATIONS --- */
+
+/* Novice: Default Zoom (already applied) */
+
+/* Avancé: Bouncy Pop */
+.zoom-card.Avancé {
+  animation: popBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  border-bottom: 5px solid #ffe135;
+}
+
+/* Élite: 3D Flip & Blue Shadow */
+.zoom-card.Élite {
+  animation: flipIn 0.8s ease-out;
+  box-shadow: 0 10px 30px rgba(33, 150, 243, 0.4);
+  border: 2px solid #2196f3;
+}
+
+/* Prestige: Shake & Intense Red Pulse */
+.zoom-card.Prestige {
+  animation: zoomIn 0.3s ease, shake 0.5s 0.3s ease-in-out, redPulse 2s infinite;
+  border: 3px solid #f44336;
+  box-shadow: 0 0 20px rgba(244, 67, 54, 0.6);
+}
+
+/* Légendaire: Holy Float & Golden Glow */
+.zoom-card.Légendaire, .zoom-card.winner {
+  animation: zoomIn 0.5s ease, float 3s ease-in-out infinite, goldGlow 2.5s infinite;
+  border: 4px solid #ffd700;
+  background: linear-gradient(to bottom right, #fff, #fffaf0);
+}
+
+/* --- KEYFRAMES --- */
+
+@keyframes popBounce {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.1); }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes flipIn {
+  0% { transform: perspective(400px) rotateX(90deg); opacity: 0; }
+  40% { transform: perspective(400px) rotateX(-20deg); }
+  60% { transform: perspective(400px) rotateX(10deg); opacity: 1; }
+  100% { transform: perspective(400px) rotateX(0deg); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px) rotate(-5deg); }
+  75% { transform: translateX(10px) rotate(5deg); }
+}
+
+@keyframes redPulse {
+  0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+  70% { box-shadow: 0 0 20px 10px rgba(244, 67, 54, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+}
+
+@keyframes goldGlow {
+  0%, 100% { box-shadow: 0 0 20px #ffd700, 0 0 40px #ffa500; }
+  50% { box-shadow: 0 0 40px #ffd700, 0 0 80px #ffa500; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+/* FIREWORKS CANVAS */
+.fireworks-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* Behind card */
+  pointer-events: none;
+}
+
+.black{
+    color:black
+}

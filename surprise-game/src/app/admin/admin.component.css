@@ -30,3 +30,61 @@ input, select { padding: 0.75rem; border: 1px solid #ced4da; border-radius: 4px;
 .Élite { border-left: 5px solid #007bff; }
 .Prestige { border-left: 5px solid #f44336; }
 .Légendaire { border-left: 5px solid #343a40; }
+
+.view-btn {
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+.view-btn:hover { background: #666; }
+
+.actions { display: flex; align-items: center; }
+
+/* Overlay & Card Styles (Copied from GameComponent for consistency) */
+.overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s;
+}
+
+.zoom-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  color: black;
+  max-width: 400px;
+  width: 90%;
+  animation: zoomIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.reveal-img {
+  max-width: 100%;
+  max-height: 250px;
+  margin: 1rem 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  object-fit: cover;
+}
+
+.prize-info { padding: 10px; border-radius: 5px; color: black; margin-top: 10px; }
+.prize-info.Novice { background: white; border: 1px solid #ccc; }
+.prize-info.Avancé { background: #ffe135; }
+.prize-info.Élite { background: #4169e1; color: white; }
+.prize-info.Prestige { background: #f44336; color: white; }
+.prize-info.Légendaire { background: black; color: white; }
+
+.tap-hint { margin-top: 15px; color: #666; font-size: 0.9rem; }
+
+@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+@keyframes zoomIn { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
