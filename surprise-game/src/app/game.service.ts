@@ -6,6 +6,7 @@ export interface Prize {
   id: string;
   name: string;
   imageUrl: string;
+  videoUrl?: string; // NEW FIELD
   value: number;
   category: Category;
   isRevealed: boolean;
@@ -32,11 +33,27 @@ export class GameService {
   currentRoundIndex = signal(0);
   casesOpenedInCurrentRound = signal(0);
   
-  // Track prestige revealed count for the specific round logic
   private prestigeRevealedInRound = 0;
 
+  // Define Category Rank Order
+  private categoryOrder: Record<Category, number> = {
+    'Novice': 0,
+    'Avancé': 1,
+    'Élite': 2,
+    'Prestige': 3,
+    'Légendaire': 4
+  };
+
+  // CORRECTED SORTING: 1. Category Rank, 2. Price Value
   sortedPrizes = computed(() => {
-    return this.prizes().slice().sort((a, b) => a.value - b.value);
+    return this.prizes().slice().sort((a, b) => {
+      // Primary Sort: Category
+      const catDiff = this.categoryOrder[a.category] - this.categoryOrder[b.category];
+      if (catDiff !== 0) return catDiff;
+      
+      // Secondary Sort: Price
+      return a.value - b.value;
+    });
   });
 
   constructor() {
@@ -96,7 +113,6 @@ export class GameService {
     this.prestigeRevealedInRound = 0;
   }
 
-  // Helper to swap prizes between two cases seamlessly
   private swapPrizes(caseId1: number, caseId2: number) {
     this.briefcases.update(cases => {
       const c1 = cases.find(c => c.id === caseId1)!;
@@ -112,12 +128,10 @@ export class GameService {
   }
 
   selectMainCase(id: number) {
-    // RIGGED: Ensure the selected case contains "Légendaire"
     const currentCases = this.briefcases();
     const legendaryCase = currentCases.find(c => c.prize.category === 'Légendaire');
     
     if (legendaryCase && legendaryCase.id !== id) {
-      // Swap Legendary into the chosen case
       this.swapPrizes(id, legendaryCase.id);
     }
 
@@ -132,26 +146,22 @@ export class GameService {
     let targetCase = currentCases.find(c => c.id === id);
     if (!targetCase || targetCase.isOpen || targetCase.isHeld) return;
 
-    // --- RIGGING LOGIC ---
     const roundIdx = this.currentRoundIndex();
     const neededForRound = this.rounds[roundIdx];
     const openedInRound = this.casesOpenedInCurrentRound();
-    const shotsLeft = neededForRound - openedInRound - 1; // -1 because we are about to open this one
+    const shotsLeft = neededForRound - openedInRound - 1;
 
-    // Helper: Find valid swap candidates (Closed, Not Held, Not Legendary)
     const getCandidates = (filterFn: (c: Briefcase) => boolean) => {
       return this.briefcases().filter(c => 
         !c.isOpen && !c.isHeld && 
-        c.prize.category !== 'Légendaire' && // Never swap Legendary back in
-        c.id !== id && // Don't swap with self
+        c.prize.category !== 'Légendaire' && 
+        c.id !== id && 
         filterFn(c)
       );
     };
 
-    // ROUND 1: No Prestige Removed
     if (roundIdx === 0) {
       if (targetCase.prize.category === 'Prestige') {
-        // Swap with ANY non-Prestige
         const candidates = getCandidates(c => c.prize.category !== 'Prestige');
         if (candidates.length > 0) {
           const swapTarget = candidates[Math.floor(Math.random() * candidates.length)];
@@ -159,13 +169,10 @@ export class GameService {
         }
       }
     }
-
-    // ROUND 2 & 3: Exactly 1 Prestige Removed
     else if (roundIdx === 1 || roundIdx === 2) {
       const isPrestige = targetCase.prize.category === 'Prestige';
       
       if (isPrestige) {
-        // If we already found one, we can't find another
         if (this.prestigeRevealedInRound >= 1) {
           const candidates = getCandidates(c => c.prize.category !== 'Prestige');
           if (candidates.length > 0) {
@@ -174,9 +181,7 @@ export class GameService {
           }
         }
       } else {
-        // If it's NOT Prestige, but it's the LAST SHOT and we haven't found one yet
         if (this.prestigeRevealedInRound === 0 && shotsLeft === 0) {
-          // Force Swap IN a Prestige
           const candidates = getCandidates(c => c.prize.category === 'Prestige');
           if (candidates.length > 0) {
             const swapTarget = candidates[Math.floor(Math.random() * candidates.length)];
@@ -186,9 +191,6 @@ export class GameService {
       }
     }
 
-    // --- END RIGGING ---
-
-    // Refresh state after potential swaps
     currentCases = this.briefcases();
     targetCase = currentCases.find(c => c.id === id)!;
 
@@ -196,7 +198,6 @@ export class GameService {
       this.prestigeRevealedInRound++;
     }
 
-    // Standard Open Logic
     this.briefcases.update(cases => cases.map(c => 
       c.id === id ? { ...c, isOpen: true } : c
     ));
@@ -205,24 +206,18 @@ export class GameService {
     ));
 
     this.casesOpenedInCurrentRound.update(v => v + 1);
-    
-    // NOTE: We do NOT advance the round here anymore.
-    // 'advanceGame()' must be called by the UI after the user closes the popup.
   }
 
-  // New method called when user closes the "Zoom" popup
   advanceGame() {
     const opened = this.casesOpenedInCurrentRound();
     const needed = this.rounds[this.currentRoundIndex()];
 
     if (opened >= needed) {
       if (this.currentRoundIndex() < this.rounds.length - 1) {
-        // Next Round
         this.currentRoundIndex.update(i => i + 1);
         this.casesOpenedInCurrentRound.set(0);
-        this.prestigeRevealedInRound = 0; // Reset counter for new round
+        this.prestigeRevealedInRound = 0;
       } else {
-        // Go to Final Decision
         this.gameState.set('SWAP_ROUND');
       }
     }
@@ -246,10 +241,10 @@ export class GameService {
   }
 
   private finishGame() {
-    this.gameState.set('FINISHED');
     const held = this.briefcases().find(c => c.isHeld)!;
     this.briefcases.update(cases => cases.map(c => 
       c.id === held.id ? { ...c, isOpen: true } : c
     ));
+    this.gameState.set('FINISHED');
   }
 }

@@ -32,7 +32,7 @@ export class AdminComponent {
   });
 
   newPrize: Partial<Prize> = { category: 'Novice' };
-  editingId: string | null = null; // Track which ID we are editing
+  editingId: string | null = null;
   
   previewPrize: Prize | null = null;
 
@@ -47,33 +47,31 @@ export class AdminComponent {
     }
   }
 
-  // Handle both Create and Update
   savePrize() {
-    // Basic validation
     if (!this.newPrize.name || !this.newPrize.value) return;
 
     if (this.editingId) {
-      // UPDATE EXISTING
       this.gameService.prizes.update(prizes => prizes.map(p => {
         if (p.id === this.editingId) {
           return {
             ...p,
             name: this.newPrize.name!,
             imageUrl: this.newPrize.imageUrl || '',
+            videoUrl: this.newPrize.videoUrl || '', // Save Video URL
             value: this.newPrize.value!,
             category: this.newPrize.category as Category
           };
         }
         return p;
       }));
-      this.cancelEdit(); // Exit edit mode
+      this.cancelEdit();
     } else {
-      // CREATE NEW
       if (this.prizes().length < 16) {
         const prize: Prize = {
           id: crypto.randomUUID(),
           name: this.newPrize.name!,
           imageUrl: this.newPrize.imageUrl || '',
+          videoUrl: this.newPrize.videoUrl || '', // Save Video URL
           value: this.newPrize.value!,
           category: this.newPrize.category as Category,
           isRevealed: false
@@ -84,16 +82,15 @@ export class AdminComponent {
     }
   }
 
-  // Load prize data into form
   editPrize(prize: Prize) {
     this.editingId = prize.id;
     this.newPrize = {
       name: prize.name,
       imageUrl: prize.imageUrl,
+      videoUrl: prize.videoUrl, // Load Video URL
       value: prize.value,
       category: prize.category
     };
-    // Scroll to top to show form
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -103,9 +100,8 @@ export class AdminComponent {
   }
 
   resetForm() {
-    // Keep the last used category for convenience, clear others
     const currentCategory = this.newPrize.category;
-    this.newPrize = { category: currentCategory, name: '', imageUrl: '', value: 0 };
+    this.newPrize = { category: currentCategory, name: '', imageUrl: '', videoUrl: '', value: 0 };
   }
 
   removePrize(id: string) {

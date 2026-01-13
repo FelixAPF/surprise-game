@@ -23,6 +23,8 @@
     <div class="inputs">
       <input [(ngModel)]="newPrize.name" placeholder="Prize Title" />
       <input [(ngModel)]="newPrize.imageUrl" placeholder="Image URL (http://...)" />
+      <input [(ngModel)]="newPrize.videoUrl" placeholder="Final Prize Video (mp4/YouTube URL)" />
+      
       <input type="number" [(ngModel)]="newPrize.value" placeholder="Value ($)" />
       <select [(ngModel)]="newPrize.category">
         <option *ngFor="let c of categories" [value]="c">{{c}}</option>
@@ -52,6 +54,7 @@
         <div class="item-category" [style.color]="getCategoryColor(p.category)">{{p.category}}</div>
         <div class="item-name">{{p.name}}</div>
         <div class="item-value">{{p.value | currency}}</div>
+        <div *ngIf="p.videoUrl" style="font-size: 0.7rem; color: #4caf50; margin-top: 2px;">🎥 Video Attached</div>
       </div>
       
       <div class="item-actions">
@@ -78,6 +81,7 @@
       <h3 style="margin:0">{{previewPrize.name}}</h3>
       <p style="color: #e50914; font-weight: bold; margin: 5px 0;">{{previewPrize.category}}</p>
       <p style="color: #888; font-size: 0.9rem;">Value: {{previewPrize.value | currency}}</p>
+      <p *ngIf="previewPrize.videoUrl" style="color: #4caf50; font-size: 0.9rem;">🎥 Has Video</p>
     </div>
     <p style="margin-top: 15px; color: #555; font-size: 0.8rem; cursor: pointer;">(CLICK OUTSIDE TO CLOSE)</p>
   </div>

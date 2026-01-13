@@ -2,12 +2,12 @@
   
   <div class="board-area" id="main-board" *ngIf="gs.gameState() !== 'SETUP'">
     <header class="game-header">
-      <h1 *ngIf="gs.gameState() === 'PICK_OWN'">Choose Your Case</h1>
+      <h1 *ngIf="gs.gameState() === 'PICK_OWN'">Choisissez votre valise</h1>
       <h1 *ngIf="gs.gameState() === 'PLAYING'">
-        Round {{gs.currentRoundIndex() + 1}} <span style="color:#666; margin: 0 15px;">|</span> <span style="color:#e50914">Open {{remainingToOpen()}}</span>
+        Manche {{gs.currentRoundIndex() + 1}} <span style="color:#666; margin: 0 15px;">|</span> <span style="color:#e50914">Ouvrir {{remainingToOpen()}}</span>
       </h1>
-      <h1 *ngIf="gs.gameState() === 'SWAP_ROUND'">Final Decision</h1>
-      <h1 *ngIf="gs.gameState() === 'FINISHED'">Game Over</h1>
+      <h1 *ngIf="gs.gameState() === 'SWAP_ROUND'">Décision Finale</h1>
+      <h1 *ngIf="gs.gameState() === 'FINISHED' && !isPlayingVideo()">Résumé</h1>
     </header>
 
     <div class="grid">
@@ -20,7 +20,7 @@
     </div>
 
     <div class="held-section" *ngIf="heldCase()">
-      <h3>YOUR CASE</h3>
+      <h3>VOTRE VALISE</h3>
       <div class="briefcase held" [class.open]="heldCase()?.isOpen">
         <span>{{heldCase()?.id}}</span>
       </div>
@@ -30,16 +30,16 @@
   <div class="board-area" *ngIf="gs.gameState() === 'SETUP'">
     <header class="game-header" style="z-index: 100;">
       <h1 class="netflix-anim" style="font-size: 6rem; color: #e50914; margin-bottom: 10px;">SURPRISE GAME</h1>
-      <p class="fade-in-delayed" style="font-size: 1.5rem; color: #999; letter-spacing: 5px; font-weight: 300;">A NETFLIX ORIGINAL</p>
+      <p class="fade-in-delayed" style="font-size: 1.5rem; color: #999; letter-spacing: 5px; font-weight: 300;">UNE PRODUCTION ORIGINALE</p>
       
       <div class="fade-in-delayed" style="margin-top: 60px;">
         <div *ngIf="gs.prizes().length === 16; else notReady">
-          <button class="big-start-btn" (click)="gs.startGame()">PLAY NOW</button>
+          <button class="big-start-btn" (click)="gs.startGame()">JOUER</button>
         </div>
         <ng-template #notReady>
           <div style="color: #666;">
-            <p style="margin-bottom: 20px;">SYSTEM INITIALIZING...</p>
-            <a routerLink="/admin" style="color: #e50914; text-decoration: none; border: 1px solid #333; padding: 10px 20px; border-radius: 4px;">ACCESS ADMIN PANEL</a>
+            <p style="margin-bottom: 20px;">INITIALISATION DU SYSTÈME...</p>
+            <a routerLink="/admin" style="color: #e50914; text-decoration: none; border: 1px solid #333; padding: 10px 20px; border-radius: 4px;">ACCÈS ADMIN</a>
           </div>
         </ng-template>
       </div>
@@ -48,13 +48,9 @@
 
   <div class="sidebar">
     <div style="margin-bottom: 20px; color: #666; font-size: 0.8rem; letter-spacing: 2px; font-weight: bold; text-align: right;">
-      PRIZES REMAINING
+      PRIX RESTANTS
     </div>
-    
-    <div *ngFor="let p of gs.sortedPrizes()" 
-         class="prize-row" 
-         [ngClass]="p.category"
-         [class.eliminated]="p.isRevealed">
+    <div *ngFor="let p of gs.sortedPrizes()" class="prize-row" [ngClass]="p.category" [class.eliminated]="p.isRevealed">
       <span class="prize-name" style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
         {{ p.name }}
       </span>
@@ -67,7 +63,7 @@
   <div class="zoom-card" [class]="zoomedCase.prize.category" (click)="$event.stopPropagation()">
     <div class="card-content">
       <div style="font-size: 1rem; color: #888; letter-spacing: 4px; margin-bottom: 15px; font-weight: bold;">
-        CASE {{zoomedCase.id}}
+        VALISE {{zoomedCase.id}}
       </div>
       <img [src]="zoomedCase.prize.imageUrl" class="reveal-img">
       <div class="prize-info">
@@ -80,24 +76,58 @@
 
 <div class="overlay" *ngIf="gs.gameState() === 'SWAP_ROUND'">
   <div class="swap-card">
-    <h2>One Case Left</h2>
-    <p style="color: #aaa; margin: 20px 0;">Do you want to switch your case?</p>
+    <h2>Il reste une valise</h2>
+    <p style="color: #aaa; margin: 20px 0;">Voulez-vous échanger votre valise ?</p>
     <div class="actions">
-      <button (click)="gs.keepCase()">KEEP CASE {{heldCase()?.id}}</button>
-      <button (click)="gs.swapCase()" style="background: #333; color: white;">SWAP</button>
+      <button (click)="gs.keepCase()">GARDER {{heldCase()?.id}}</button>
+      <button (click)="gs.swapCase()" style="background: #333; color: white;">ÉCHANGER</button>
     </div>
   </div>
 </div>
 
-<div class="overlay" *ngIf="gs.gameState() === 'FINISHED' && heldCase()?.isOpen">
+<div class="overlay video-overlay" *ngIf="isPlayingVideo()">
+  
+  <video *ngIf="videoType() === 'GENERIC'"
+         [src]="safeVideoUrl()" 
+         autoplay 
+         (ended)="onVideoEnded()"
+         class="fullscreen-video">
+  </video>
+
+  <div *ngIf="videoType() === 'YOUTUBE'" class="youtube-wrapper">
+    <div #ytPlayer></div>
+  </div>
+
+  <button class="skip-btn" (click)="onVideoEnded()">PASSER</button>
+</div>
+
+<div class="overlay" *ngIf="gs.gameState() === 'FINISHED' && !isPlayingVideo()">
   <canvas #winnerCanvas class="fireworks-canvas"></canvas>
   
-  <div class="zoom-card winner" (click)="resetGame()">
-    <div class="card-content">
-      <h1 style="color: #46d369; font-size: 5rem; text-shadow: 0 0 30px rgba(70, 211, 105, 0.4);">WINNER</h1>
-      <img [src]="heldCase()?.prize?.imageUrl" class="reveal-img large">
-      <h2>{{heldCase()?.prize?.name}}</h2>
-      <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">CLICK TO RESTART</p>
+  <div class="summary-board">
+    
+    <div class="winner-section">
+      <h1 class="winner-title">FÉLICITATIONS</h1>
+      <div class="zoom-card winner" [class]="heldCase()?.prize?.category">
+        <div class="card-content">
+          <img [src]="heldCase()?.prize?.imageUrl" class="reveal-img large">
+          <h2>{{heldCase()?.prize?.name}}</h2>
+          <p class="prize-category">{{heldCase()?.prize?.category}}</p>
+        </div>
+      </div>
+      <button class="play-again-btn" (click)="resetGame()">REJOUER</button>
     </div>
+
+    <div class="others-section">
+      <h3>Les Autres Prix</h3>
+      <div class="others-grid">
+        <div *ngFor="let p of unwonPrizes()" class="mini-card" [ngClass]="p.category">
+          <div class="mini-info">
+            <span class="mini-name">{{p.name}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
   </div>
 </div>
