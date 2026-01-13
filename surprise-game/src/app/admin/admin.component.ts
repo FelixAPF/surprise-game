@@ -17,51 +17,99 @@ export class AdminComponent {
 
   categories: Category[] = ['Novice', 'Avancé', 'Élite', 'Prestige', 'Légendaire'];
   
-  // Category Ranking for Sorting
   private categoryOrder: Record<Category, number> = {
-    'Novice': 0,
-    'Avancé': 1,
-    'Élite': 2,
-    'Prestige': 3,
-    'Légendaire': 4
+    'Novice': 0, 'Avancé': 1, 'Élite': 2, 'Prestige': 3, 'Légendaire': 4
   };
 
-  // Original list (for adding/removing)
   prizes = this.gameService.prizes;
 
-  // Sorted list for Display: 1. Category, 2. Value
   sortedPrizes = computed(() => {
     return this.prizes().slice().sort((a, b) => {
-      // First sort by Category
       const catDiff = this.categoryOrder[a.category] - this.categoryOrder[b.category];
       if (catDiff !== 0) return catDiff;
-      
-      // Then sort by Price
       return a.value - b.value;
     });
   });
 
   newPrize: Partial<Prize> = { category: 'Novice' };
+  editingId: string | null = null; // Track which ID we are editing
+  
   previewPrize: Prize | null = null;
 
-  addPrize() {
-    if (this.newPrize.name && this.newPrize.value && this.prizes().length < 16) {
-      const prize: Prize = {
-        id: crypto.randomUUID(),
-        name: this.newPrize.name!,
-        imageUrl: this.newPrize.imageUrl || '',
-        value: this.newPrize.value!,
-        category: this.newPrize.category as Category,
-        isRevealed: false
-      };
-      this.gameService.prizes.update(p => [...p, prize]);
-      this.newPrize = { category: 'Novice', name: '', imageUrl: '', value: 0 };
+  getCategoryColor(cat: Category): string {
+    switch(cat) {
+      case 'Novice': return '#ffffff';
+      case 'Avancé': return '#ffeb3b';
+      case 'Élite': return '#2196f3';
+      case 'Prestige': return '#e50914';
+      case 'Légendaire': return '#ffd700';
+      default: return '#fff';
     }
   }
 
-  // UPDATED: Now removes by ID because the index in 'sortedPrizes' 
-  // doesn't match the index in the original 'prizes' array.
+  // Handle both Create and Update
+  savePrize() {
+    // Basic validation
+    if (!this.newPrize.name || !this.newPrize.value) return;
+
+    if (this.editingId) {
+      // UPDATE EXISTING
+      this.gameService.prizes.update(prizes => prizes.map(p => {
+        if (p.id === this.editingId) {
+          return {
+            ...p,
+            name: this.newPrize.name!,
+            imageUrl: this.newPrize.imageUrl || '',
+            value: this.newPrize.value!,
+            category: this.newPrize.category as Category
+          };
+        }
+        return p;
+      }));
+      this.cancelEdit(); // Exit edit mode
+    } else {
+      // CREATE NEW
+      if (this.prizes().length < 16) {
+        const prize: Prize = {
+          id: crypto.randomUUID(),
+          name: this.newPrize.name!,
+          imageUrl: this.newPrize.imageUrl || '',
+          value: this.newPrize.value!,
+          category: this.newPrize.category as Category,
+          isRevealed: false
+        };
+        this.gameService.prizes.update(p => [...p, prize]);
+        this.resetForm();
+      }
+    }
+  }
+
+  // Load prize data into form
+  editPrize(prize: Prize) {
+    this.editingId = prize.id;
+    this.newPrize = {
+      name: prize.name,
+      imageUrl: prize.imageUrl,
+      value: prize.value,
+      category: prize.category
+    };
+    // Scroll to top to show form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  cancelEdit() {
+    this.editingId = null;
+    this.resetForm();
+  }
+
+  resetForm() {
+    // Keep the last used category for convenience, clear others
+    const currentCategory = this.newPrize.category;
+    this.newPrize = { category: currentCategory, name: '', imageUrl: '', value: 0 };
+  }
+
   removePrize(id: string) {
+    if (this.editingId === id) this.cancelEdit();
     this.gameService.prizes.update(p => p.filter(item => item.id !== id));
   }
 
@@ -74,8 +122,9 @@ export class AdminComponent {
   }
 
   resetGame() {
-    if(confirm('Are you sure? This will delete all prizes and reset the game state.')) {
+    if(confirm('⚠ WARNING: This will wipe all game data. Continue?')) {
       this.gameService.resetAllData();
+      this.cancelEdit();
     }
   }
 
@@ -88,43 +137,35 @@ export class AdminComponent {
     const data = JSON.stringify(this.prizes(), null, 2);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    
     const a = document.createElement('a');
     a.href = url;
     a.download = 'surprise-game-prizes.json';
     a.click();
-    
     URL.revokeObjectURL(url);
   }
 
   importPrizes(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
-
     const file = input.files[0];
     const reader = new FileReader();
-    
     reader.onload = (e) => {
       try {
         const content = e.target?.result as string;
         const data = JSON.parse(content);
-        
         if (Array.isArray(data)) {
-          const freshPrizes = data.map((p: any) => ({
-            ...p,
-            isRevealed: false 
-          }));
+          const freshPrizes = data.map((p: any) => ({ ...p, isRevealed: false }));
           this.gameService.prizes.set(freshPrizes);
           input.value = '';
+          this.cancelEdit();
         } else {
-          alert('Invalid JSON: Root must be an array.');
+          alert('Invalid JSON');
         }
       } catch (err) {
-        console.error('Error parsing JSON', err);
-        alert('Failed to parse JSON file.');
+        console.error(err);
+        alert('Failed to parse JSON');
       }
     };
-    
     reader.readAsText(file);
   }
 }

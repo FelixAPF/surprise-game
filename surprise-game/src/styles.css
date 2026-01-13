@@ -1,1 +1,45 @@
-/* You can add global styles to this file, and also import other style files */
+/* GLOBAL STYLES - NETFLIX DARK THEME */
+:root {
+  --bg-color: #141414;
+  --card-bg: #2f2f2f;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --brand-red: #e50914; /* Netflix Red */
+  --brand-hover: #f40612;
+  --gold: #ffd700;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: 'Montserrat', sans-serif;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+button {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #141414;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

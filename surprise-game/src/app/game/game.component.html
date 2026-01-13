@@ -1,30 +1,13 @@
 <div class="game-container">
   
-  <div class="board-area" *ngIf="gs.gameState() === 'SETUP'">
+  <div class="board-area" id="main-board" *ngIf="gs.gameState() !== 'SETUP'">
     <header class="game-header">
-      <h1>Welcome to the Game</h1>
-      
-      <div *ngIf="gs.prizes().length === 16; else notReady">
-        <h2 style="color: #4caf50; margin-bottom: 2rem;">Ready to Play</h2>
-        <button class="big-start-btn" (click)="gs.startGame()">START GAME</button>
-      </div>
-
-      <ng-template #notReady>
-        <h2 style="color: #f44336;">Setup Incomplete</h2>
-        <p>You need exactly 16 prizes to start. (Current: {{gs.prizes().length}})</p>
-        <a routerLink="/admin" style="color: #2196f3; font-size: 1.2rem; cursor: pointer;">Go to Admin Panel</a>
-      </ng-template>
-    </header>
-  </div>
-
-  <div class="board-area" *ngIf="gs.gameState() !== 'SETUP'">
-    <header class="game-header">
-      <h1 *ngIf="gs.gameState() === 'PICK_OWN'">Choose YOUR Lucky Briefcase</h1>
+      <h1 *ngIf="gs.gameState() === 'PICK_OWN'">Choose Your Case</h1>
       <h1 *ngIf="gs.gameState() === 'PLAYING'">
-        Round {{gs.currentRoundIndex() + 1}}: Open {{remainingToOpen}} Briefcase(s)
+        Round {{gs.currentRoundIndex() + 1}} <span style="color:#666; margin: 0 15px;">|</span> <span style="color:#e50914">Open {{remainingToOpen()}}</span>
       </h1>
       <h1 *ngIf="gs.gameState() === 'SWAP_ROUND'">Final Decision</h1>
-      <h1 *ngIf="gs.gameState() === 'FINISHED'">Congratulations!</h1>
+      <h1 *ngIf="gs.gameState() === 'FINISHED'">Game Over</h1>
     </header>
 
     <div class="grid">
@@ -32,25 +15,48 @@
            class="briefcase"
            [class.open]="c.isOpen"
            (click)="handleCaseClick(c)">
-        <span *ngIf="!c.isOpen">{{c.id}}</span>
+        <span>{{c.id}}</span>
       </div>
     </div>
 
-    <div class="held-section" *ngIf="heldCase">
-      <h3>Your Case</h3>
-      <div class="briefcase held" [class.open]="heldCase?.isOpen">
-        <span>{{heldCase?.id}}</span>
+    <div class="held-section" *ngIf="heldCase()">
+      <h3>YOUR CASE</h3>
+      <div class="briefcase held" [class.open]="heldCase()?.isOpen">
+        <span>{{heldCase()?.id}}</span>
       </div>
     </div>
   </div>
 
+  <div class="board-area" *ngIf="gs.gameState() === 'SETUP'">
+    <header class="game-header" style="z-index: 100;">
+      <h1 class="netflix-anim" style="font-size: 6rem; color: #e50914; margin-bottom: 10px;">SURPRISE GAME</h1>
+      <p class="fade-in-delayed" style="font-size: 1.5rem; color: #999; letter-spacing: 5px; font-weight: 300;">A NETFLIX ORIGINAL</p>
+      
+      <div class="fade-in-delayed" style="margin-top: 60px;">
+        <div *ngIf="gs.prizes().length === 16; else notReady">
+          <button class="big-start-btn" (click)="gs.startGame()">PLAY NOW</button>
+        </div>
+        <ng-template #notReady>
+          <div style="color: #666;">
+            <p style="margin-bottom: 20px;">SYSTEM INITIALIZING...</p>
+            <a routerLink="/admin" style="color: #e50914; text-decoration: none; border: 1px solid #333; padding: 10px 20px; border-radius: 4px;">ACCESS ADMIN PANEL</a>
+          </div>
+        </ng-template>
+      </div>
+    </header>
+  </div>
+
   <div class="sidebar">
+    <div style="margin-bottom: 20px; color: #666; font-size: 0.8rem; letter-spacing: 2px; font-weight: bold; text-align: right;">
+      PRIZES REMAINING
+    </div>
+    
     <div *ngFor="let p of gs.sortedPrizes()" 
          class="prize-row" 
          [ngClass]="p.category"
          [class.eliminated]="p.isRevealed">
-      <span class="prize-value">
-        {{ p.isRevealed ? p.name : "?" }}
+      <span class="prize-name" style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        {{ p.name }}
       </span>
     </div>
   </div>
@@ -58,42 +64,40 @@
 </div>
 
 <div class="overlay" *ngIf="zoomedCase" (click)="closeZoom()">
-  
-  <div class="zoom-card" 
-       [class]="zoomedCase.prize.category"
-       (click)="$event.stopPropagation()">
-    
-    <h2>Briefcase {{zoomedCase.id}} contained...</h2>
-    <img [src]="zoomedCase.prize.imageUrl" alt="Prize Image" class="reveal-img">
-    
-    <div class="prize-info" [ngClass]="zoomedCase.prize.category">
-      <h3>{{zoomedCase.prize.name}}</h3>
-      <p style="font-size: 1.2rem; font-weight: normal;">{{zoomedCase.prize.category}}</p>
+  <div class="zoom-card" [class]="zoomedCase.prize.category" (click)="$event.stopPropagation()">
+    <div class="card-content">
+      <div style="font-size: 1rem; color: #888; letter-spacing: 4px; margin-bottom: 15px; font-weight: bold;">
+        CASE {{zoomedCase.id}}
+      </div>
+      <img [src]="zoomedCase.prize.imageUrl" class="reveal-img">
+      <div class="prize-info">
+        <h3>{{zoomedCase.prize.name}}</h3>
+        <p class="prize-category">{{zoomedCase.prize.category}}</p>
+      </div>
     </div>
-    
-    <p class="tap-hint">(Tap anywhere to close)</p>
   </div>
 </div>
 
 <div class="overlay" *ngIf="gs.gameState() === 'SWAP_ROUND'">
   <div class="swap-card">
-    <h2>Final Round</h2>
-    <p>You have one case left on the board.</p>
-    <p>Do you want to keep your original case ({{heldCase?.id}}) or SWAP it?</p>
+    <h2>One Case Left</h2>
+    <p style="color: #aaa; margin: 20px 0;">Do you want to switch your case?</p>
     <div class="actions">
-      <button (click)="gs.keepCase()">KEEP CASE {{heldCase?.id}}</button>
-      <button (click)="gs.swapCase()">SWAP CASE</button>
+      <button (click)="gs.keepCase()">KEEP CASE {{heldCase()?.id}}</button>
+      <button (click)="gs.swapCase()" style="background: #333; color: white;">SWAP</button>
     </div>
   </div>
 </div>
 
-<div class="overlay" *ngIf="gs.gameState() === 'FINISHED' && heldCase?.isOpen">
+<div class="overlay" *ngIf="gs.gameState() === 'FINISHED' && heldCase()?.isOpen">
   <canvas #winnerCanvas class="fireworks-canvas"></canvas>
-
+  
   <div class="zoom-card winner" (click)="resetGame()">
-    <h1 class="black">CONGRATULATIONS!</h1>
-    <img [src]="heldCase!.prize.imageUrl" class="reveal-img large">
-    <h2 class="black">You won:</h2>
-    <h1 style="color: #d32f2f; font-size: 2.5rem;">{{heldCase!.prize.name}}</h1>
+    <div class="card-content">
+      <h1 style="color: #46d369; font-size: 5rem; text-shadow: 0 0 30px rgba(70, 211, 105, 0.4);">WINNER</h1>
+      <img [src]="heldCase()?.prize?.imageUrl" class="reveal-img large">
+      <h2>{{heldCase()?.prize?.name}}</h2>
+      <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">CLICK TO RESTART</p>
+    </div>
   </div>
 </div>

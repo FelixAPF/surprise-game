@@ -1,61 +1,84 @@
 <div class="admin-container">
+  
   <header class="admin-header">
-    <h1>Game Master Setup</h1>
+    <div class="branding">
+      <div style="font-size: 0.9rem; color: #666; letter-spacing: 3px; font-weight: bold;">BACKSTAGE PASS</div>
+      <h1>GAME MASTER</h1>
+    </div>
     
-    <div class="header-actions" style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <div class="header-actions">
       <input #fileInput type="file" (change)="importPrizes($event)" style="display:none" accept=".json" />
-      <button (click)="fileInput.click()" class="action-btn">📂 Import JSON</button>
-      <button (click)="exportPrizes()" class="action-btn">💾 Export JSON</button>
-      <button class="reset-btn" (click)="resetGame()">⚠ Reset All</button>
+      <button (click)="fileInput.click()" class="action-btn">📂 Import</button>
+      <button (click)="exportPrizes()" class="action-btn">💾 Export</button>
+      <button class="action-btn reset-btn" (click)="resetGame()">⚠ Reset Data</button>
     </div>
   </header>
   
-  <div class="warning" *ngIf="prizes().length < 16">
-    Status: Setup ({{prizes().length}}/16 Prizes)
-  </div>
-  <div class="success" *ngIf="prizes().length === 16">
-    Status: Ready to Play!
+  <div class="status-bar" [ngClass]="prizes().length === 16 ? 'ready' : 'setup'">
+    <span *ngIf="prizes().length < 16">⚠ SETUP IN PROGRESS: {{prizes().length}} / 16 PRIZES CONFIGURED</span>
+    <span *ngIf="prizes().length === 16">✓ SYSTEM READY FOR BROADCAST</span>
   </div>
 
-  <div class="form-group">
+  <div class="form-card" [class.editing]="editingId">
     <div class="inputs">
-      <input [(ngModel)]="newPrize.name" placeholder="Prize Name" />
-      <input [(ngModel)]="newPrize.imageUrl" placeholder="Image URL" />
-      <input type="number" [(ngModel)]="newPrize.value" placeholder="Price ($)" />
+      <input [(ngModel)]="newPrize.name" placeholder="Prize Title" />
+      <input [(ngModel)]="newPrize.imageUrl" placeholder="Image URL (http://...)" />
+      <input type="number" [(ngModel)]="newPrize.value" placeholder="Value ($)" />
       <select [(ngModel)]="newPrize.category">
         <option *ngFor="let c of categories" [value]="c">{{c}}</option>
       </select>
     </div>
-    <button class="add-btn" (click)="addPrize()" [disabled]="prizes().length >= 16">Add Prize</button>
-  </div>
-
-  <div class="list">
-    <div *ngFor="let p of sortedPrizes()" class="item" [ngClass]="p.category">
-      <div class="item-info" (click)="openPreview(p)" style="cursor: pointer; flex: 1;">
-        <span class="badge">{{p.category}}</span>
-        <strong>{{p.name}}</strong> ({{p.value | currency}})
-      </div>
-      <div class="actions">
-        <button class="view-btn" (click)="openPreview(p)">👁</button>
-        <button class="remove-btn" (click)="removePrize(p.id)">X</button>
-      </div>
+    
+    <div class="form-actions" style="display: flex; gap: 10px;">
+      <button class="add-btn" (click)="savePrize()" 
+              [disabled]="!editingId && prizes().length >= 16"
+              [class.update-btn]="editingId">
+        {{ editingId ? 'UPDATE ↻' : 'ADD +' }}
+      </button>
+      
+      <button *ngIf="editingId" class="cancel-btn" (click)="cancelEdit()">
+        CANCEL
+      </button>
     </div>
   </div>
 
-  <button class="start-btn" (click)="startGame()" [disabled]="prizes().length !== 16">
-    LOCK IN & START GAME
-  </button>
+  <div class="list-grid">
+    <div *ngFor="let p of sortedPrizes()" 
+         class="prize-item" 
+         [ngClass]="p.category"
+         [class.editing-item]="editingId === p.id">
+      
+      <div class="item-info" (click)="openPreview(p)">
+        <div class="item-category" [style.color]="getCategoryColor(p.category)">{{p.category}}</div>
+        <div class="item-name">{{p.name}}</div>
+        <div class="item-value">{{p.value | currency}}</div>
+      </div>
+      
+      <div class="item-actions">
+        <button class="icon-btn" (click)="openPreview(p)" title="Preview">👁</button>
+        <button class="icon-btn edit" (click)="editPrize(p)" title="Edit">✎</button>
+        <button class="icon-btn delete" (click)="removePrize(p.id)" title="Delete">✕</button>
+      </div>
+      
+    </div>
+  </div>
+
+  <div class="start-section" *ngIf="prizes().length === 16 && !editingId">
+    <button class="start-btn" (click)="startGame()">
+      INITIATE GAME
+    </button>
+  </div>
 </div>
 
 <div class="overlay" *ngIf="previewPrize" (click)="closePreview()">
   <div class="zoom-card" (click)="$event.stopPropagation()">
-    <h2>Prize Preview</h2>
-    <img [src]="previewPrize.imageUrl" alt="Prize Image" class="reveal-img">
-    <div class="prize-info" [ngClass]="previewPrize.category">
-      <h3>{{previewPrize.name}}</h3>
-      <p style="font-size: 1.5rem; font-weight: bold;">{{previewPrize.value | currency}}</p>
-      <p>{{previewPrize.category}}</p>
+    <h2 style="font-family: 'Bebas Neue'; color: #ccc;">PREVIEW</h2>
+    <img [src]="previewPrize.imageUrl" alt="Prize" class="reveal-img">
+    <div style="background: #333; padding: 10px; border-radius: 4px;">
+      <h3 style="margin:0">{{previewPrize.name}}</h3>
+      <p style="color: #e50914; font-weight: bold; margin: 5px 0;">{{previewPrize.category}}</p>
+      <p style="color: #888; font-size: 0.9rem;">Value: {{previewPrize.value | currency}}</p>
     </div>
-    <p class="tap-hint">(Click outside to close)</p>
+    <p style="margin-top: 15px; color: #555; font-size: 0.8rem; cursor: pointer;">(CLICK OUTSIDE TO CLOSE)</p>
   </div>
 </div>
