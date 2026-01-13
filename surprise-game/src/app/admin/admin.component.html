@@ -1,0 +1,39 @@
+<div class="admin-container">
+  <header class="admin-header">
+    <h1>Game Master Setup</h1>
+    <button class="reset-btn" (click)="resetGame()">⚠ Reset All Data</button>
+  </header>
+  
+  <div class="warning" *ngIf="prizes().length < 16">
+    Status: Setup ({{prizes().length}}/16 Prizes)
+  </div>
+  <div class="success" *ngIf="prizes().length === 16">
+    Status: Ready to Play!
+  </div>
+
+  <div class="form-group">
+    <div class="inputs">
+      <input [(ngModel)]="newPrize.name" placeholder="Prize Name" />
+      <input [(ngModel)]="newPrize.imageUrl" placeholder="Image URL" />
+      <input type="number" [(ngModel)]="newPrize.value" placeholder="Price ($)" />
+      <select [(ngModel)]="newPrize.category">
+        <option *ngFor="let c of categories" [value]="c">{{c}}</option>
+      </select>
+    </div>
+    <button class="add-btn" (click)="addPrize()" [disabled]="prizes().length >= 16">Add Prize</button>
+  </div>
+
+  <div class="list">
+    <div *ngFor="let p of prizes(); let i = index" class="item" [ngClass]="p.category">
+      <div class="item-info">
+        <span class="badge">{{p.category}}</span>
+        <strong>{{p.name}}</strong> ({{p.value | currency}})
+      </div>
+      <button class="remove-btn" (click)="removePrize(i)">X</button>
+    </div>
+  </div>
+
+  <button class="start-btn" (click)="startGame()" [disabled]="prizes().length !== 16">
+    LOCK IN & START GAME
+  </button>
+</div>

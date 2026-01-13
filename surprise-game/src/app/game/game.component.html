@@ -1,0 +1,75 @@
+<div class="game-container">
+  
+  <div class="board-area">
+    <header class="game-header">
+      <h1 *ngIf="gs.gameState() === 'PICK_OWN'">Choose YOUR Lucky Briefcase</h1>
+      <h1 *ngIf="gs.gameState() === 'PLAYING'">
+        Round {{gs.currentRoundIndex() + 1}}: Open {{remainingToOpen}} Briefcase(s)
+      </h1>
+      <h1 *ngIf="gs.gameState() === 'SWAP_ROUND'">Final Decision</h1>
+      <h1 *ngIf="gs.gameState() === 'FINISHED'">Congratulations!</h1>
+    </header>
+
+    <div class="grid">
+      <div *ngFor="let c of boardCases" 
+           class="briefcase"
+           [class.open]="c.isOpen"
+           (click)="handleCaseClick(c)">
+        <span *ngIf="!c.isOpen">{{c.id}}</span>
+      </div>
+    </div>
+
+    <div class="held-section" *ngIf="heldCase">
+      <h3>Your Case</h3>
+      <div class="briefcase held" [class.open]="heldCase?.isOpen">
+        <span>{{heldCase?.id}}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div *ngFor="let p of gs.sortedPrizes()" 
+         class="prize-row" 
+         [ngClass]="p.category"
+         [class.eliminated]="p.isRevealed">
+      <span class="prize-value">
+        {{ p.isRevealed ? (p.value | currency) : '?' }}
+      </span>
+    </div>
+  </div>
+
+</div>
+
+<div class="overlay" *ngIf="zoomedCase" (click)="closeZoom()">
+  <div class="zoom-card">
+    <h2>Briefcase {{zoomedCase.id}} contained...</h2>
+    <img [src]="zoomedCase.prize.imageUrl" alt="Prize Image" class="reveal-img">
+    <div class="prize-info" [ngClass]="zoomedCase.prize.category">
+      <h3>{{zoomedCase.prize.name}}</h3>
+      <p style="font-size: 1.5rem; font-weight: bold;">{{zoomedCase.prize.value | currency}}</p>
+      <p>{{zoomedCase.prize.category}}</p>
+    </div>
+    <p class="tap-hint">(Tap to continue)</p>
+  </div>
+</div>
+
+<div class="overlay" *ngIf="gs.gameState() === 'SWAP_ROUND'">
+  <div class="swap-card">
+    <h2>Final Round</h2>
+    <p>You have one case left on the board.</p>
+    <p>Do you want to keep your original case ({{heldCase?.id}}) or SWAP it?</p>
+    <div class="actions">
+      <button (click)="gs.keepCase()">KEEP CASE {{heldCase?.id}}</button>
+      <button (click)="gs.swapCase()">SWAP CASE</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" *ngIf="gs.gameState() === 'FINISHED' && heldCase?.isOpen">
+  <div class="zoom-card winner">
+    <h1>YOU WON!</h1>
+    <img [src]="heldCase!.prize.imageUrl" class="reveal-img large">
+    <h2>{{heldCase!.prize.name}}</h2>
+    <h1 style="color: green;">{{heldCase!.prize.value | currency}}</h1>
+  </div>
+</div>

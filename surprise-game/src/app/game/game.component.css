@@ -1,0 +1,150 @@
+/* Layout */
+.game-container {
+  display: flex;
+  height: 100vh;
+  background: #1a1a1a;
+  color: white;
+  font-family: 'Arial', sans-serif;
+  overflow: hidden;
+}
+
+.board-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.sidebar {
+  width: 280px;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 5px;
+  border-left: 2px solid #333;
+}
+
+/* Header */
+.game-header { margin-bottom: 2rem; text-align: center; }
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+/* Briefcases */
+.briefcase {
+  width: 100px;
+  height: 80px;
+  background: linear-gradient(135deg, #daa520, #8b6508);
+  border: 3px solid #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 800;
+  text-shadow: 1px 1px 2px black;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  transition: transform 0.2s;
+}
+.briefcase:hover { transform: scale(1.05); }
+
+/* When a case is opened, hide it from the board visually */
+.briefcase.open { visibility: hidden; pointer-events: none; }
+
+/* User's Held Case */
+.held-section {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  text-align: center;
+}
+.briefcase.held {
+  background: linear-gradient(135deg, #ff0000, #990000);
+  width: 120px;
+  height: 100px;
+}
+/* Ensure the held case stays visible even if marked 'open' at the very end */
+.briefcase.held.open { visibility: visible; }
+
+/* Prize Ladder Colors & Styles */
+.prize-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-weight: bold;
+  color: black;
+  transition: opacity 0.5s;
+}
+
+.prize-row.Novice { background: white; }
+.prize-row.Avancé { background: #ffe135; }
+.prize-row.Élite { background: #4169e1; color: white; }
+.prize-row.Prestige { background: #c0c0c0; }
+.prize-row.Légendaire { background: black; color: white; border: 1px solid white; }
+
+.prize-row.eliminated {
+  opacity: 0.15;
+  text-decoration: line-through;
+}
+
+/* Overlay & Animations */
+.overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  animation: fadeIn 0.3s;
+}
+
+.zoom-card, .swap-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  color: black;
+  max-width: 500px;
+  animation: zoomIn 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.reveal-img {
+  max-width: 100%;
+  max-height: 300px;
+  margin: 1rem 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.prize-info { padding: 10px; border-radius: 5px; color: black; }
+.prize-info.Novice { background: white; border: 1px solid #ccc; }
+.prize-info.Avancé { background: #ffe135; }
+.prize-info.Élite { background: #4169e1; color: white; }
+.prize-info.Prestige { background: #f44336; }
+.prize-info.Légendaire { background: black; color: black; }
+
+.actions button {
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  margin: 10px;
+  cursor: pointer;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+@keyframes zoomIn { from {transform: scale(0);} to {transform: scale(1);} }
