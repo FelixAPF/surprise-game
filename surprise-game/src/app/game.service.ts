@@ -6,7 +6,7 @@ export interface Prize {
   id: string;
   name: string;
   imageUrl: string;
-  videoUrl?: string; // NEW FIELD
+  videoUrl?: string;
   value: number;
   category: Category;
   isRevealed: boolean;
@@ -26,32 +26,26 @@ export interface Briefcase {
 export class GameService {
   prizes = signal<Prize[]>([]);
   briefcases = signal<Briefcase[]>([]);
-  gameState = signal<'SETUP' | 'PICK_OWN' | 'PLAYING' | 'SWAP_ROUND' | 'FINISHED'>('SETUP');
+  // ADDED 'RULES' STATE
+  gameState = signal<'SETUP' | 'RULES' | 'PICK_OWN' | 'PLAYING' | 'SWAP_ROUND' | 'FINISHED'>('SETUP');
   
-  // Rounds: 3, 3, 3, 3, 2 cases to open
+  isAutoWin = signal(true); 
+  targetPrizeId = signal<string | null>(null);
+
   rounds = [3, 3, 3, 3, 2];
   currentRoundIndex = signal(0);
   casesOpenedInCurrentRound = signal(0);
   
   private prestigeRevealedInRound = 0;
 
-  // Define Category Rank Order
   private categoryOrder: Record<Category, number> = {
-    'Novice': 0,
-    'Avancé': 1,
-    'Élite': 2,
-    'Prestige': 3,
-    'Légendaire': 4
+    'Novice': 0, 'Avancé': 1, 'Élite': 2, 'Prestige': 3, 'Légendaire': 4
   };
 
-  // CORRECTED SORTING: 1. Category Rank, 2. Price Value
   sortedPrizes = computed(() => {
     return this.prizes().slice().sort((a, b) => {
-      // Primary Sort: Category
       const catDiff = this.categoryOrder[a.category] - this.categoryOrder[b.category];
       if (catDiff !== 0) return catDiff;
-      
-      // Secondary Sort: Price
       return a.value - b.value;
     });
   });
@@ -64,7 +58,9 @@ export class GameService {
         briefcases: this.briefcases(),
         gameState: this.gameState(),
         currentRoundIndex: this.currentRoundIndex(),
-        casesOpenedInCurrentRound: this.casesOpenedInCurrentRound()
+        casesOpenedInCurrentRound: this.casesOpenedInCurrentRound(),
+        isAutoWin: this.isAutoWin(),
+        targetPrizeId: this.targetPrizeId()
       };
       localStorage.setItem('surpriseGameState', JSON.stringify(state));
     });
@@ -80,6 +76,8 @@ export class GameService {
         if (state.gameState) this.gameState.set(state.gameState);
         if (state.currentRoundIndex) this.currentRoundIndex.set(state.currentRoundIndex);
         if (state.casesOpenedInCurrentRound) this.casesOpenedInCurrentRound.set(state.casesOpenedInCurrentRound);
+        if (state.isAutoWin !== undefined) this.isAutoWin.set(state.isAutoWin);
+        if (state.targetPrizeId !== undefined) this.targetPrizeId.set(state.targetPrizeId);
       } catch (e) {
         console.error('Failed to load state', e);
       }
@@ -107,10 +105,16 @@ export class GameService {
       isRemoved: false
     }));
     this.briefcases.set(newCases);
-    this.gameState.set('PICK_OWN');
+    // CHANGED: Go to RULES first, not PICK_OWN
+    this.gameState.set('RULES'); 
     this.currentRoundIndex.set(0);
     this.casesOpenedInCurrentRound.set(0);
     this.prestigeRevealedInRound = 0;
+  }
+
+  // NEW: Call this when user clicks "I Understand"
+  confirmRules() {
+    this.gameState.set('PICK_OWN');
   }
 
   private swapPrizes(caseId1: number, caseId2: number) {
@@ -118,7 +122,6 @@ export class GameService {
       const c1 = cases.find(c => c.id === caseId1)!;
       const c2 = cases.find(c => c.id === caseId2)!;
       const tempPrize = c1.prize;
-      
       return cases.map(c => {
         if (c.id === caseId1) return { ...c, prize: c2.prize };
         if (c.id === caseId2) return { ...c, prize: tempPrize };
@@ -129,10 +132,29 @@ export class GameService {
 
   selectMainCase(id: number) {
     const currentCases = this.briefcases();
-    const legendaryCase = currentCases.find(c => c.prize.category === 'Légendaire');
-    
-    if (legendaryCase && legendaryCase.id !== id) {
-      this.swapPrizes(id, legendaryCase.id);
+    const specificTargetId = this.targetPrizeId();
+
+    if (specificTargetId) {
+      const targetCase = currentCases.find(c => c.prize.id === specificTargetId);
+      if (targetCase && targetCase.id !== id) {
+        this.swapPrizes(id, targetCase.id);
+      }
+    } 
+    else if (this.isAutoWin()) {
+      let highestRank = -1;
+      currentCases.forEach(c => {
+        const rank = this.categoryOrder[c.prize.category];
+        if (rank > highestRank) highestRank = rank;
+      });
+      const topTierCases = currentCases.filter(c => 
+        this.categoryOrder[c.prize.category] === highestRank
+      );
+      if (topTierCases.length > 0) {
+        const randomBest = topTierCases[Math.floor(Math.random() * topTierCases.length)];
+        if (randomBest.id !== id) {
+          this.swapPrizes(id, randomBest.id);
+        }
+      }
     }
 
     this.briefcases.update(cases => cases.map(c => 
@@ -155,6 +177,7 @@ export class GameService {
       return this.briefcases().filter(c => 
         !c.isOpen && !c.isHeld && 
         c.prize.category !== 'Légendaire' && 
+        c.prize.id !== this.targetPrizeId() &&
         c.id !== id && 
         filterFn(c)
       );
@@ -171,7 +194,6 @@ export class GameService {
     }
     else if (roundIdx === 1 || roundIdx === 2) {
       const isPrestige = targetCase.prize.category === 'Prestige';
-      
       if (isPrestige) {
         if (this.prestigeRevealedInRound >= 1) {
           const candidates = getCandidates(c => c.prize.category !== 'Prestige');
@@ -211,7 +233,6 @@ export class GameService {
   advanceGame() {
     const opened = this.casesOpenedInCurrentRound();
     const needed = this.rounds[this.currentRoundIndex()];
-
     if (opened >= needed) {
       if (this.currentRoundIndex() < this.rounds.length - 1) {
         this.currentRoundIndex.update(i => i + 1);
@@ -224,15 +245,21 @@ export class GameService {
   }
 
   swapCase() {
+    const held = this.briefcases().find(c => c.isHeld)!;
+    const remaining = this.briefcases().find(c => !c.isHeld && !c.isOpen)!;
+
     this.briefcases.update(cases => {
-      const held = cases.find(c => c.isHeld)!;
-      const remaining = cases.find(c => !c.isHeld && !c.isOpen)!;
       return cases.map(c => {
         if (c.id === held.id) return { ...c, isHeld: false };
         if (c.id === remaining.id) return { ...c, isHeld: true };
         return c;
       });
     });
+
+    if (this.targetPrizeId() || this.isAutoWin()) {
+       this.swapPrizes(held.id, remaining.id);
+    }
+
     this.finishGame();
   }
 

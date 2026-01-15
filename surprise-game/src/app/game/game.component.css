@@ -747,3 +747,502 @@
   width: 100%;
   height: 100%;
 }
+
+/* ... KEEP ALL EXISTING STYLES ... */
+
+/* --- LOCKED STATE STYLES --- */
+
+.locked-state {
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #e50914; /* Netflix Red */
+}
+
+.lock-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  animation: pulseLock 1s infinite alternate;
+}
+
+.locked-state h2 {
+  font-family: 'Bebas Neue';
+  font-size: 3rem;
+  letter-spacing: 5px;
+  margin: 0;
+  color: #fff;
+  text-shadow: 0 0 20px #e50914;
+}
+
+.pulsing-bar {
+  width: 50%;
+  height: 4px;
+  background: #e50914;
+  margin-top: 30px;
+  border-radius: 2px;
+  animation: pulseBar 0.8s infinite alternate;
+  box-shadow: 0 0 20px #e50914;
+}
+
+/* Violent Shaking Animation for the Card Container */
+.locked-shaking {
+  animation: violentShake 0.15s infinite;
+  border: 2px solid #e50914 !important; /* Force red border during lock */
+  box-shadow: 0 0 50px rgba(229, 9, 20, 0.5) !important;
+}
+
+.fade-in-content {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes violentShake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-3px, 3px) rotate(-1deg); }
+  50% { transform: translate(3px, -3px) rotate(1deg); }
+  75% { transform: translate(-3px, -3px) rotate(-1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes pulseLock {
+  from { transform: scale(1); opacity: 0.8; }
+  to { transform: scale(1.2); opacity: 1; text-shadow: 0 0 30px red; }
+}
+
+@keyframes pulseBar {
+  from { width: 20%; opacity: 0.5; }
+  to { width: 80%; opacity: 1; }
+}
+
+/* Add this to your .zoom-card */
+.zoom-card {
+  transition: transform 0.1s ease-out; /* Smooth movement */
+  transform-style: preserve-3d;
+}
+
+/* The "Shine" Overlay */
+.zoom-card::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(125deg, transparent 40%, rgba(255,255,255, 0.4) 45%, transparent 50%);
+  transform: translateX(-100%); /* Move this with JS based on mouse */
+  pointer-events: none;
+}
+
+
+/* ... KEEP EXISTING STYLES ... */
+
+/* IDEA 3: GLOBAL IMPACT EFFECTS (Applied to Body) */
+
+/* The White Flash Bang */
+body.impact-flash::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: white;
+  z-index: 9999; /* Above everything */
+  animation: flashFade 0.8s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes flashFade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* The Violent Screen Shake */
+body.impact-shake {
+  animation: earthquake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes earthquake {
+  10%, 90% { transform: translate3d(-5px, 0, 0); }
+  20%, 80% { transform: translate3d(10px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-20px, 0, 0); }
+  40%, 60% { transform: translate3d(20px, 0, 0); }
+}
+
+/* ... KEEP EXISTING LOCKED-STATE ANIMATIONS ... */
+
+.locked-state {
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #e50914; 
+}
+
+.lock-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  animation: pulseLock 1s infinite alternate;
+}
+
+.locked-state h2 {
+  font-family: 'Bebas Neue';
+  font-size: 3rem;
+  letter-spacing: 5px;
+  margin: 0;
+  color: #fff;
+  text-shadow: 0 0 20px #e50914;
+}
+
+.pulsing-bar {
+  width: 50%;
+  height: 4px;
+  background: #e50914;
+  margin-top: 30px;
+  border-radius: 2px;
+  animation: pulseBar 0.8s infinite alternate;
+  box-shadow: 0 0 20px #e50914;
+}
+
+/* Shaking Animation for the CARD (Pre-Reveal Tension) */
+.locked-shaking {
+  animation: violentShake 0.15s infinite;
+  border: 2px solid #e50914 !important; 
+  box-shadow: 0 0 50px rgba(229, 9, 20, 0.5) !important;
+}
+
+.fade-in-content {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes violentShake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-3px, 3px) rotate(-1deg); }
+  50% { transform: translate(3px, -3px) rotate(1deg); }
+  75% { transform: translate(-3px, -3px) rotate(-1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes pulseLock {
+  from { transform: scale(1); opacity: 0.8; }
+  to { transform: scale(1.2); opacity: 1; text-shadow: 0 0 30px red; }
+}
+
+@keyframes pulseBar {
+  from { width: 20%; opacity: 0.5; }
+  to { width: 80%; opacity: 1; }
+}
+
+/* ... KEEP ALL EXISTING GRID/LAYOUT STYLES ... */
+
+/* --- DYNAMIC LOCKED STATE STYLES --- */
+
+.locked-state {
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Removed hardcoded color here, moving to specific selectors below */
+}
+
+.lock-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  animation: pulseLock 1s infinite alternate;
+}
+
+.locked-state h2 {
+  font-family: 'Bebas Neue';
+  font-size: 3rem;
+  letter-spacing: 5px;
+  margin: 0;
+  color: #fff;
+  /* Removed hardcoded text-shadow */
+}
+
+.pulsing-bar {
+  width: 50%;
+  height: 4px;
+  margin-top: 30px;
+  border-radius: 2px;
+  animation: pulseBar 0.8s infinite alternate;
+}
+
+/* --- CATEGORY SPECIFIC COLORS --- */
+
+/* PRESTIGE: Netflix Red */
+.zoom-card.Prestige .locked-state { color: #e50914; }
+.zoom-card.Prestige .lock-icon { text-shadow: 0 0 30px #e50914; }
+.zoom-card.Prestige .locked-state h2 { text-shadow: 0 0 20px #e50914; }
+.zoom-card.Prestige .pulsing-bar { 
+  background: #e50914; 
+  box-shadow: 0 0 20px #e50914; 
+}
+.zoom-card.Prestige.locked-shaking {
+  animation: violentShake 0.15s infinite;
+  border: 3px solid #e50914 !important;
+  box-shadow: 0 0 50px rgba(229, 9, 20, 0.6) !important;
+}
+
+/* LÉGENDAIRE: Holy Gold */
+.zoom-card.Légendaire .locked-state { color: #ffd700; }
+.zoom-card.Légendaire .lock-icon { text-shadow: 0 0 40px #ffd700; }
+.zoom-card.Légendaire .locked-state h2 { text-shadow: 0 0 30px #ffd700; }
+.zoom-card.Légendaire .pulsing-bar { 
+  background: #ffd700; 
+  box-shadow: 0 0 30px #ffd700; 
+}
+.zoom-card.Légendaire.locked-shaking {
+  animation: violentShake 0.15s infinite;
+  border: 4px solid #ffd700 !important;
+  box-shadow: 
+    0 0 60px rgba(255, 215, 0, 0.8),
+    inset 0 0 30px rgba(255, 215, 0, 0.3) !important;
+}
+
+
+/* --- ANIMATIONS --- */
+
+.fade-in-content {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes violentShake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-3px, 3px) rotate(-1deg); }
+  50% { transform: translate(3px, -3px) rotate(1deg); }
+  75% { transform: translate(-3px, -3px) rotate(-1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes pulseLock {
+  from { transform: scale(1); opacity: 0.8; }
+  to { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes pulseBar {
+  from { width: 20%; opacity: 0.5; }
+  to { width: 80%; opacity: 1; }
+}
+
+/* ... KEEP GLOBAL IMPACT EFFECTS (shake-screen, flash) ... */
+body.impact-flash::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: white;
+  z-index: 9999;
+  animation: flashFade 0.8s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes flashFade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+body.impact-shake {
+  animation: earthquake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes earthquake {
+  10%, 90% { transform: translate3d(-5px, 0, 0); }
+  20%, 80% { transform: translate3d(10px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-20px, 0, 0); }
+  40%, 60% { transform: translate3d(20px, 0, 0); }
+}
+
+/* ... KEEP VIDEO & SUMMARY STYLES ... */
+
+/* ... KEEP ALL EXISTING STYLES ... */
+
+/* --- TITLE CARD OVERLAY --- */
+.title-card-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: black;
+  z-index: 5000; /* Extremely high z-index */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeOut 0.5s 2.5s ease-out forwards; /* Auto hide after delay */
+}
+
+.title-content {
+  text-align: center;
+  animation: zoomIn 3s ease-out;
+}
+
+.title-content h1 {
+  font-family: 'Bebas Neue';
+  font-size: 8rem;
+  color: #e50914;
+  margin: 0;
+  text-shadow: 0 0 50px rgba(229, 9, 20, 0.5);
+  letter-spacing: 10px;
+}
+
+.title-bar {
+  width: 0%;
+  height: 5px;
+  background: white;
+  margin: 20px auto 0;
+  animation: expandBar 1s 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes expandBar {
+  to { width: 100px; }
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1.1); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; pointer-events: none; visibility: hidden; }
+}
+
+
+/* ... KEEP EXISTING STYLES ... */
+
+/* --- RULES OVERLAY --- */
+.rules-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.9);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.rules-card {
+  background: #1a1a1a;
+  padding: 3rem;
+  border-radius: 12px;
+  max-width: 900px;
+  width: 90%;
+  text-align: center;
+  border: 1px solid #333;
+  box-shadow: 0 0 50px rgba(0,0,0,0.8);
+}
+
+.rules-title {
+  font-family: 'Bebas Neue';
+  font-size: 4rem;
+  color: #fff;
+  letter-spacing: 5px;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e50914;
+  display: inline-block;
+  padding-bottom: 10px;
+}
+
+.rules-grid {
+  display: flex;
+  gap: 3rem;
+  margin-bottom: 3rem;
+  text-align: left;
+}
+
+.rules-section {
+  flex: 1;
+}
+
+.rules-section h3 {
+  color: #888;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  font-family: 'Bebas Neue';
+  font-size: 1.5rem;
+}
+
+/* Steps */
+.steps-list {
+  list-style: none;
+  padding: 0;
+}
+
+.steps-list li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  color: #ccc;
+}
+
+.step-num {
+  background: #e50914;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+/* Category Legend */
+.category-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  background: #2a2a2a;
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.legend-item .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 15px;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.legend-item span {
+  font-weight: bold;
+  letter-spacing: 1px;
+  flex: 1;
+}
+
+.legend-item small {
+  color: #666;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+/* Specific Colors for Legend */
+.legend-item.Novice { color: #fff; }
+.legend-item.Novice .dot { background: #fff; }
+
+.legend-item.Avancé { color: #ffeb3b; }
+.legend-item.Avancé .dot { background: #ffeb3b; }
+
+.legend-item.Élite { color: #2196f3; }
+.legend-item.Élite .dot { background: #2196f3; }
+
+.legend-item.Prestige { color: #e50914; border-color: #e50914; }
+.legend-item.Prestige .dot { background: #e50914; }
+
+.legend-item.Légendaire { color: #ffd700; border-color: #ffd700; background: rgba(255, 215, 0, 0.1); }
+.legend-item.Légendaire .dot { background: #ffd700; box-shadow: 0 0 15px #ffd700; }
+
+.rules-card {
+  /* ... existing styles ... */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* This forces the button to center horizontally */
+}
+
+/* Add margin to the button inside rules */
+.rules-card .big-start-btn {
+  margin-top: 20px;
+}

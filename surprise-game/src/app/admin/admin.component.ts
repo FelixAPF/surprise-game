@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GameService, Prize, Category } from '../game.service';
 
+// ... (Helper function extractSrcFromIframe if needed) ...
+
 @Component({
   selector: 'app-admin',
   standalone: true,
@@ -33,9 +35,20 @@ export class AdminComponent {
 
   newPrize: Partial<Prize> = { category: 'Novice' };
   editingId: string | null = null;
-  
   previewPrize: Prize | null = null;
 
+toggleAutoWin(event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.gameService.isAutoWin.set(isChecked);
+  }
+
+  setTargetPrize(id: string | null) {
+    // "null" string from select option needs to be converted to actual null
+    const val = id === 'null' ? null : id;
+    this.gameService.targetPrizeId.set(val);
+  }
+  // ... (Keep existing methods: getCategoryColor, savePrize, editPrize, cancelEdit, etc.) ...
+  
   getCategoryColor(cat: Category): string {
     switch(cat) {
       case 'Novice': return '#ffffff';
@@ -48,7 +61,15 @@ export class AdminComponent {
   }
 
   savePrize() {
+    // ... (Keep existing implementation) ...
     if (!this.newPrize.name || !this.newPrize.value) return;
+
+    let cleanVideoUrl = this.newPrize.videoUrl || '';
+    if (cleanVideoUrl.includes('<iframe')) {
+       // Assuming extract function is here or logic is simple
+       const match = cleanVideoUrl.match(/src="([^"]+)"/);
+       if (match) cleanVideoUrl = match[1];
+    }
 
     if (this.editingId) {
       this.gameService.prizes.update(prizes => prizes.map(p => {
@@ -57,7 +78,7 @@ export class AdminComponent {
             ...p,
             name: this.newPrize.name!,
             imageUrl: this.newPrize.imageUrl || '',
-            videoUrl: this.newPrize.videoUrl || '', // Save Video URL
+            videoUrl: cleanVideoUrl,
             value: this.newPrize.value!,
             category: this.newPrize.category as Category
           };
@@ -71,7 +92,7 @@ export class AdminComponent {
           id: crypto.randomUUID(),
           name: this.newPrize.name!,
           imageUrl: this.newPrize.imageUrl || '',
-          videoUrl: this.newPrize.videoUrl || '', // Save Video URL
+          videoUrl: cleanVideoUrl,
           value: this.newPrize.value!,
           category: this.newPrize.category as Category,
           isRevealed: false
@@ -84,13 +105,7 @@ export class AdminComponent {
 
   editPrize(prize: Prize) {
     this.editingId = prize.id;
-    this.newPrize = {
-      name: prize.name,
-      imageUrl: prize.imageUrl,
-      videoUrl: prize.videoUrl, // Load Video URL
-      value: prize.value,
-      category: prize.category
-    };
+    this.newPrize = { ...prize };
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -109,13 +124,8 @@ export class AdminComponent {
     this.gameService.prizes.update(p => p.filter(item => item.id !== id));
   }
 
-  openPreview(prize: Prize) {
-    this.previewPrize = prize;
-  }
-
-  closePreview() {
-    this.previewPrize = null;
-  }
+  openPreview(prize: Prize) { this.previewPrize = prize; }
+  closePreview() { this.previewPrize = null; }
 
   resetGame() {
     if(confirm('⚠ WARNING: This will wipe all game data. Continue?')) {
@@ -130,6 +140,7 @@ export class AdminComponent {
   }
 
   exportPrizes() {
+    // ... (Keep existing implementation) ...
     const data = JSON.stringify(this.prizes(), null, 2);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -141,6 +152,7 @@ export class AdminComponent {
   }
 
   importPrizes(event: Event) {
+    // ... (Keep existing implementation) ...
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
     const file = input.files[0];
@@ -154,13 +166,8 @@ export class AdminComponent {
           this.gameService.prizes.set(freshPrizes);
           input.value = '';
           this.cancelEdit();
-        } else {
-          alert('Invalid JSON');
         }
-      } catch (err) {
-        console.error(err);
-        alert('Failed to parse JSON');
-      }
+      } catch (err) { console.error(err); }
     };
     reader.readAsText(file);
   }

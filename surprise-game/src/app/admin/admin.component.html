@@ -7,6 +7,28 @@
     </div>
     
     <div class="header-actions">
+      
+      <div class="god-mode-control">
+        <label style="font-size: 0.7rem; color: #888; font-weight: bold;">GOD MODE (FORCE PRIZE)</label>
+        <select [ngModel]="gameService.targetPrizeId()" 
+                (ngModelChange)="setTargetPrize($event)"
+                class="god-mode-select">
+          <option [ngValue]="null">-- NO TARGET (Random) --</option>
+          <option *ngFor="let p of sortedPrizes()" [value]="p.id">
+            [{{p.category}}] {{p.name}}
+          </option>
+        </select>
+      </div>
+
+      <label class="toggle-switch" [class.disabled]="!!gameService.targetPrizeId()">
+        <input type="checkbox" 
+               [checked]="gameService.isAutoWin()" 
+               [disabled]="!!gameService.targetPrizeId()"
+               (change)="toggleAutoWin($event)">
+        <span class="slider"></span>
+        <span class="label-text">AUTO WIN</span>
+      </label>
+
       <input #fileInput type="file" (change)="importPrizes($event)" style="display:none" accept=".json" />
       <button (click)="fileInput.click()" class="action-btn">📂 Import</button>
       <button (click)="exportPrizes()" class="action-btn">💾 Export</button>
@@ -23,8 +45,7 @@
     <div class="inputs">
       <input [(ngModel)]="newPrize.name" placeholder="Prize Title" />
       <input [(ngModel)]="newPrize.imageUrl" placeholder="Image URL (http://...)" />
-      <input [(ngModel)]="newPrize.videoUrl" placeholder="Final Prize Video (mp4/YouTube URL)" />
-      
+      <input [(ngModel)]="newPrize.videoUrl" placeholder="Final Prize Video (mp4/YouTube Clip)" />
       <input type="number" [(ngModel)]="newPrize.value" placeholder="Value ($)" />
       <select [(ngModel)]="newPrize.category">
         <option *ngFor="let c of categories" [value]="c">{{c}}</option>
@@ -37,10 +58,7 @@
               [class.update-btn]="editingId">
         {{ editingId ? 'UPDATE ↻' : 'ADD +' }}
       </button>
-      
-      <button *ngIf="editingId" class="cancel-btn" (click)="cancelEdit()">
-        CANCEL
-      </button>
+      <button *ngIf="editingId" class="cancel-btn" (click)="cancelEdit()">CANCEL</button>
     </div>
   </div>
 
@@ -48,11 +66,15 @@
     <div *ngFor="let p of sortedPrizes()" 
          class="prize-item" 
          [ngClass]="p.category"
-         [class.editing-item]="editingId === p.id">
+         [class.editing-item]="editingId === p.id"
+         [class.target-locked]="gameService.targetPrizeId() === p.id">
       
       <div class="item-info" (click)="openPreview(p)">
         <div class="item-category" [style.color]="getCategoryColor(p.category)">{{p.category}}</div>
-        <div class="item-name">{{p.name}}</div>
+        <div class="item-name">
+          <span *ngIf="gameService.targetPrizeId() === p.id">🎯 </span>
+          {{p.name}}
+        </div>
         <div class="item-value">{{p.value | currency}}</div>
         <div *ngIf="p.videoUrl" style="font-size: 0.7rem; color: #4caf50; margin-top: 2px;">🎥 Video Attached</div>
       </div>
@@ -67,9 +89,7 @@
   </div>
 
   <div class="start-section" *ngIf="prizes().length === 16 && !editingId">
-    <button class="start-btn" (click)="startGame()">
-      INITIATE GAME
-    </button>
+    <button class="start-btn" (click)="startGame()">INITIATE GAME</button>
   </div>
 </div>
 

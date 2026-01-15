@@ -43,3 +43,156 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* --- GLOBAL BUTTON STYLES --- */
+
+/* Reset & Base Style for ALL Buttons */
+button {
+  font-family: 'Roboto', sans-serif; /* Fallback */
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all 0.2s ease-out;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* 1. THE "NETFLIX RED" PRIMARY ACTION BUTTONS 
+   (Used for: Start Game, J'ai Compris, Play Again, Skip)
+*/
+.big-start-btn, 
+.play-again-btn, 
+.skip-btn, 
+.start-btn {
+  background-color: #e50914; /* Netflix Red */
+  color: white;
+  padding: 15px 40px;
+  font-size: 1.5rem;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  font-family: 'Bebas Neue', sans-serif; /* Ensure title font is used */
+  letter-spacing: 3px;
+  min-width: 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.big-start-btn:hover, 
+.play-again-btn:hover, 
+.skip-btn:hover, 
+.start-btn:hover {
+  background-color: #f40612; /* Brighter Red */
+  transform: scale(1.05); /* Slight grow effect */
+  box-shadow: 0 8px 15px rgba(229, 9, 20, 0.4);
+}
+
+.big-start-btn:active, 
+.play-again-btn:active, 
+.skip-btn:active, 
+.start-btn:active {
+  transform: scale(0.98); /* Click press effect */
+}
+
+/* 2. SECONDARY / ADMIN BUTTONS 
+   (Used for: Import, Export, Reset, Cancel) 
+*/
+.action-btn, 
+.cancel-btn,
+.add-btn {
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.action-btn:hover, 
+.cancel-btn:hover {
+  background-color: #444;
+  border-color: #fff;
+}
+
+/* 3. SPECIAL "ADD/UPDATE" BUTTON (Green) */
+.add-btn {
+  background-color: #46d369; /* Netflix Green */
+  color: #000;
+  border: none;
+  font-weight: 900;
+}
+
+.add-btn:hover {
+  background-color: #5ce67f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(70, 211, 105, 0.3);
+}
+
+/* 4. "DANGER" BUTTONS (Reset, Delete) */
+.reset-btn, 
+.delete {
+  background-color: transparent;
+  border: 1px solid #666;
+  color: #999;
+}
+
+.reset-btn:hover, 
+.delete:hover {
+  border-color: #e50914;
+  color: #e50914;
+  background: rgba(229, 9, 20, 0.1);
+}
+
+/* 5. ICON BUTTONS (Eye, Edit, Trash) */
+.icon-btn {
+  background: transparent;
+  color: #ccc;
+  font-size: 1.2rem;
+  padding: 5px 10px;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.icon-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* 6. SWAP OVERLAY BUTTONS (Specifically for the "Keep/Swap" decision) */
+.swap-card .actions button {
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 2px;
+  border-radius: 4px;
+  min-width: 150px;
+}
+
+/* "GARDER" (Keep) - Usually primary */
+.swap-card .actions button:first-child {
+  background-color: #e50914;
+  color: white;
+  margin-right: 20px;
+}
+
+/* "ÉCHANGER" (Swap) - Usually secondary */
+.swap-card .actions button:last-child {
+  background-color: transparent;
+  border: 2px solid #fff;
+  color: white;
+}
+
+.swap-card .actions button:first-child:hover {
+  background-color: #f40612;
+  box-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
+}
+
+.swap-card .actions button:last-child:hover {
+  background-color: white;
+  color: black;
+}
