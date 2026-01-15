@@ -183,35 +183,38 @@ export class GameService {
       );
     };
 
-    if (roundIdx === 0) {
-      if (targetCase.prize.category === 'Prestige') {
-        const candidates = getCandidates(c => c.prize.category !== 'Prestige');
-        if (candidates.length > 0) {
-          const swapTarget = candidates[Math.floor(Math.random() * candidates.length)];
-          this.swapPrizes(id, swapTarget.id);
-        }
-      }
-    }
-    else if (roundIdx === 1 || roundIdx === 2) {
-      const isPrestige = targetCase.prize.category === 'Prestige';
-      if (isPrestige) {
-        if (this.prestigeRevealedInRound >= 1) {
+    if(this.isAutoWin){
+      if (roundIdx === 0) {
+        if (targetCase.prize.category === 'Prestige') {
           const candidates = getCandidates(c => c.prize.category !== 'Prestige');
           if (candidates.length > 0) {
             const swapTarget = candidates[Math.floor(Math.random() * candidates.length)];
             this.swapPrizes(id, swapTarget.id);
           }
         }
-      } else {
-        if (this.prestigeRevealedInRound === 0 && shotsLeft === 0) {
-          const candidates = getCandidates(c => c.prize.category === 'Prestige');
-          if (candidates.length > 0) {
-            const swapTarget = candidates[Math.floor(Math.random() * candidates.length)];
-            this.swapPrizes(id, swapTarget.id);
+      }
+      else if (roundIdx === 1 || roundIdx === 2) {
+        const isPrestige = targetCase.prize.category === 'Prestige';
+        if (isPrestige) {
+          if (this.prestigeRevealedInRound >= 1) {
+            const candidates = getCandidates(c => c.prize.category !== 'Prestige');
+            if (candidates.length > 0) {
+              const swapTarget = candidates[Math.floor(Math.random() * candidates.length)];
+              this.swapPrizes(id, swapTarget.id);
+            }
+          }
+        } else {
+          if (this.prestigeRevealedInRound === 0 && shotsLeft === 0) {
+            const candidates = getCandidates(c => c.prize.category === 'Prestige');
+            if (candidates.length > 0) {
+              const swapTarget = candidates[Math.floor(Math.random() * candidates.length)];
+              this.swapPrizes(id, swapTarget.id);
+            }
           }
         }
       }
     }
+
 
     currentCases = this.briefcases();
     targetCase = currentCases.find(c => c.id === id)!;
